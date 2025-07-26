@@ -1,0 +1,12 @@
+Welcome Session,Class
+Charity Day,Union
+Career Fair,School
+Class Meeting,Class
+Blood Donation,Union
+Sports Festival,School
+Football,Class
+Singing,Union
+Volunteering,School
+Workshop,Class
+Research,School
+Drama,Union
