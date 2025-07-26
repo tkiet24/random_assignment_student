@@ -5,10 +5,11 @@
 #include "../../domain/entities/Student.h"
 #include "../../domain/repositories/IActivityRepository.h"
 #include "../../domain/repositories/IStudentRepository.h"
-#include "../../infrastructure/utils/Results.h"
 #include <array>
+#include <expected>
 #include <memory>
 #include <vector>
+#include <string>
 
 namespace application::services {
 
@@ -31,12 +32,7 @@ public:
     ActivityAssignmentService(
         std::unique_ptr<domain::repositories::IStudentRepository> studentRepo,
         std::unique_ptr<domain::repositories::IActivityRepository> activityRepo,
-        std::unique_ptr<strategies::IRandomSelectionStrategy> randomStrategy)
-        : studentRepo_(std::move(studentRepo))
-        , activityRepo_(std::move(activityRepo))
-        , randomStrategy_(std::move(randomStrategy))
-    {
-    }
+        std::unique_ptr<strategies::IRandomSelectionStrategy> randomStrategy);
 
     // Structured binding return type (C++17)
     struct AssignmentResult {
@@ -44,108 +40,29 @@ public:
         std::array<domain::entities::Activity, 3> activities;
 
         // Constructor với Student
-        AssignmentResult(domain::entities::Student s)
-            : student(std::move(s))
-        {
-        }
+        AssignmentResult(domain::entities::Student s);
     };
 
     // Main business logic method
-    [[nodiscard]] infrastructure::utils::Result<std::vector<AssignmentResult>>
-    assignActivitiesToStudents() const
-    {
-
-        // Load data
-        auto studentsResult = studentRepo_->loadStudents();
-        if (!studentsResult) {
-            return infrastructure::utils::unexpected(studentsResult.error());
-        }
-
-        auto activitiesResult = activityRepo_->loadActivities();
-        if (!activitiesResult) {
-            return infrastructure::utils::unexpected(activitiesResult.error());
-        }
-
-        const auto& students = *studentsResult;
-        const auto& activities = *activitiesResult;
-
-        // Validate có đủ activities cho mỗi category
-        if (!validateActivitiesAvailable(activities)) {
-            return infrastructure::utils::unexpected(infrastructure::utils::makeValidationError(
-                infrastructure::utils::ValidationError::InvalidData));
-        }
-
-        std::vector<AssignmentResult> results;
-        results.reserve(students.size());
-
-        // Process each student
-        for (const auto& student : students) {
-            auto assignmentResult = assignActivitiesToStudent(student, activities);
-            if (!assignmentResult) {
-                return infrastructure::utils::unexpected(assignmentResult.error());
-            }
-            results.push_back(std::move(*assignmentResult));
-        }
-
-        return results;
-    }
+    [[nodiscard]] std::optional<std::vector<AssignmentResult>>
+    assignActivitiesToStudents() const;
 
     // Method để change strategy at runtime (Strategy Pattern)
-    void setRandomStrategy(std::unique_ptr<strategies::IRandomSelectionStrategy> strategy)
-    {
-        randomStrategy_ = std::move(strategy);
-    }
+    void setRandomStrategy(std::unique_ptr<strategies::IRandomSelectionStrategy> strategy);
 
     // Get current strategy info
-    [[nodiscard]] std::string getCurrentStrategyInfo() const noexcept
-    {
-        return randomStrategy_ ? randomStrategy_->getStrategyName() : "No strategy set";
-    }
+    [[nodiscard]] std::string getCurrentStrategyInfo() const noexcept;
 
 private:
     // Helper method để validate activities
     [[nodiscard]] bool validateActivitiesAvailable(
-        const std::vector<domain::entities::Activity>& activities) const noexcept
-    {
-
-        for (auto category : REQUIRED_CATEGORIES) {
-            bool found = false;
-            for (const auto& activity : activities) {
-                if (activity.getCategory() == category) {
-                    found = true;
-                    break;
-                }
-            }
-            if (!found)
-                return false;
-        }
-        return true;
-    }
+        const std::vector<domain::entities::Activity>& activities) const noexcept;
 
     // Helper method to assign activities to a single student
-    [[nodiscard]] infrastructure::utils::Result<AssignmentResult>
+    [[nodiscard]] std::optional<AssignmentResult>
     assignActivitiesToStudent(
         const domain::entities::Student& student,
-        const std::vector<domain::entities::Activity>& activities) const
-    {
-
-        AssignmentResult result { student };
-
-        // Assign one activity per category
-        for (size_t i = 0; i < REQUIRED_CATEGORIES.size(); ++i) {
-            auto activityOpt = randomStrategy_->selectRandomActivity(
-                activities, REQUIRED_CATEGORIES[i]);
-
-            if (!activityOpt) {
-                return infrastructure::utils::unexpected(infrastructure::utils::makeValidationError(
-                    infrastructure::utils::ValidationError::InvalidData));
-            }
-
-            result.activities[i] = std::move(*activityOpt);
-        }
-
-        return result;
-    }
+        const std::vector<domain::entities::Activity>& activities) const;
 };
 
 } // namespace application::services

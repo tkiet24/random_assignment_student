@@ -16,7 +16,14 @@ TARGET = StudentActivityAssignment
 MSVC_TARGET = $(TARGET).exe
 
 # Source files
-SOURCES = $(SRC_DIR)/main.cpp
+SOURCES = $(SRC_DIR)/main.cpp \
+          $(SRC_DIR)/application/services/ActivityAssignmentService.cpp \
+          $(SRC_DIR)/application/strategies/IRandomSelectionStrategy.cpp \
+          $(SRC_DIR)/domain/entities/Activity.cpp \
+          $(SRC_DIR)/domain/entities/Student.cpp \
+          $(SRC_DIR)/infrastructure/repositories/FileActivityRepository.cpp \
+          $(SRC_DIR)/infrastructure/repositories/FileStudentRepository.cpp \
+          $(SRC_DIR)/presentation/controllers/ActivityAssignmentController.cpp
 
 # Headers (for dependency tracking)
 HEADERS = $(wildcard $(SRC_DIR)/**/*.h)

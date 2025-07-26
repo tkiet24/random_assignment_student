@@ -1,17 +1,17 @@
-#include "src/application/services/ActivityAssignmentService.h"
-#include "src/application/strategies/IRandomSelectionStrategy.h"
-#include "src/domain/repositories/IActivityRepository.h"
-#include "src/domain/repositories/IStudentRepository.h"
-#include "src/infrastructure/repositories/FileActivityRepository.h"
-#include "src/infrastructure/repositories/FileStudentRepository.h"
-#include "src/presentation/controllers/ActivityAssignmentController.h"
+#include "application/services/ActivityAssignmentService.h"
+#include "application/strategies/IRandomSelectionStrategy.h"
+#include "domain/repositories/IActivityRepository.h"
+#include "domain/repositories/IStudentRepository.h"
+#include "infrastructure/repositories/FileActivityRepository.h"
+#include "infrastructure/repositories/FileStudentRepository.h"
+#include "presentation/controllers/ActivityAssignmentController.h"
 #include <iostream>
 #include <string_view>
 
 // Nested namespace definitions (C++17)
 namespace app::config {
-constexpr std::string_view STUDENTS_FILE = "students.txt";
-constexpr std::string_view ACTIVITIES_FILE = "activities.txt";
+constexpr std::string_view STUDENTS_FILE = "data/students.txt";
+constexpr std::string_view ACTIVITIES_FILE = "data/activities.txt";
 }
 
 namespace app::factory {
